@@ -11,11 +11,11 @@
 defined('_JEXEC') or die;
 
 /**
- * PWT ACL Plugin
+ * PWT GTM Plugin
  *
  * @since   3.0
  */
-class plgSystemPwtgtm extends JPlugin
+class PlgSystemPwtgtm extends JPlugin
 {
 	/**
 	 * Application object.
@@ -26,14 +26,14 @@ class plgSystemPwtgtm extends JPlugin
 	protected $app;
 
 	/**
-	 * @var    String  base update url, to decide whether to process the event or not
+	 * @var    string  base update url, to decide whether to process the event or not
 	 *
 	 * @since  1.0.0
 	 */
 	private $baseUrl = 'https://extensions.perfectwebteam.com/pwt-gtm';
 
 	/**
-	 * @var    String  Extension title, to retrieve its params
+	 * @var    string  Extension title, to retrieve its params
 	 *
 	 * @since  1.0.0
 	 */
@@ -42,8 +42,8 @@ class plgSystemPwtgtm extends JPlugin
 	/**
 	 * Constructor
 	 *
-	 * @param object $subject The object to observe
-	 * @param array $config An optional associative array of configuration settings.
+	 * @param   object  $subject  The object to observe
+	 * @param   array   $config   An optional associative array of configuration settings.
 	 *                            Recognized key values include 'name', 'group', 'params', 'language'
 	 *                            (this list is not meant to be comprehensive).
 	 *
@@ -63,12 +63,14 @@ class plgSystemPwtgtm extends JPlugin
 	public function onAfterRender()
 	{
 		// Only for frontend
-		if (!$this->app->isClient('site')) {
+		if (!$this->app->isClient('site'))
+		{
 			return;
 		}
 
 		// Check if GTM ID is given
-		if (!$this->params->get('pwtgtm_id')) {
+		if (!$this->params->get('pwtgtm_id'))
+		{
 			return;
 		}
 
@@ -91,13 +93,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 height=\"0\" width=\"0\" style=\"display:none;visibility:hidden\"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 ";
-
-		$buffer = $this->app->getBody();
-		$buffer = str_replace("</head>", $headScript . "</head>", $buffer);
-		$buffer = preg_replace("/<body(\s[^>]*)?>/i", "<body\\1>\n" . $bodyScript, $buffer);
+		$buffer     = $this->app->getBody();
+		$buffer     = str_replace("</head>", $headScript . "</head>", $buffer);
+		$buffer     = preg_replace("/<body(\s[^>]*)?>/i", "<body\\1>\n" . $bodyScript, $buffer);
 		$this->app->setBody($buffer);
 
 		return;
-
 	}
 }
