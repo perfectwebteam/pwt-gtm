@@ -8,9 +8,6 @@
  * @link       https://extensions.perfectwebteam.com/pwt-gtm
  */
 
-use Joomla\CMS\Application\WebApplication;
-use Joomla\CMS\Factory;
-
 defined('_JEXEC') or die;
 
 /**
@@ -20,89 +17,87 @@ defined('_JEXEC') or die;
  */
 class plgSystemPwtgtm extends JPlugin
 {
-    /**
-     * Application object.
-     *
-     * @var    JApplicationCms
-     * @since  3.0
-     */
-    protected $app;
+	/**
+	 * Application object.
+	 *
+	 * @var    JApplicationCms
+	 * @since  3.0
+	 */
+	protected $app;
 
-    /**
-     * @var    String  base update url, to decide whether to process the event or not
-     *
-     * @since  1.0.0
-     */
-    private $baseUrl = 'https://extensions.perfectwebteam.com/pwt-gtm';
+	/**
+	 * @var    String  base update url, to decide whether to process the event or not
+	 *
+	 * @since  1.0.0
+	 */
+	private $baseUrl = 'https://extensions.perfectwebteam.com/pwt-gtm';
 
-    /**
-     * @var    String  Extension title, to retrieve its params
-     *
-     * @since  1.0.0
-     */
-    private $extensionTitle = 'PWT GTM';
+	/**
+	 * @var    String  Extension title, to retrieve its params
+	 *
+	 * @since  1.0.0
+	 */
+	private $extensionTitle = 'PWT GTM';
 
-    /**
-     * Constructor
-     *
-     * @param   object  $subject  The object to observe
-     * @param   array   $config   An optional associative array of configuration settings.
-     *                            Recognized key values include 'name', 'group', 'params', 'language'
-     *                            (this list is not meant to be comprehensive).
-     *
-     * @since   1.0
-     */
-    public function __construct(&$subject, array $config = array())
-    {
-        parent::__construct($subject, $config);
-    }
+	/**
+	 * Constructor
+	 *
+	 * @param object $subject The object to observe
+	 * @param array $config An optional associative array of configuration settings.
+	 *                            Recognized key values include 'name', 'group', 'params', 'language'
+	 *                            (this list is not meant to be comprehensive).
+	 *
+	 * @since   1.0
+	 */
+	public function __construct(&$subject, array $config = array())
+	{
+		parent::__construct($subject, $config);
+	}
 
-    /**
-     * onAfterRender trigger
-     *
-     * @return  void
-     * @since   3.0
-     */
-    public function onAfterRender()
-    {
-        // Only for frontend
-        if (!$this->app->isClient('site'))
-        {
-            return;
-        }
+	/**
+	 * onAfterRender trigger
+	 *
+	 * @return  void
+	 * @since   3.0
+	 */
+	public function onAfterRender()
+	{
+		// Only for frontend
+		if (!$this->app->isClient('site')) {
+			return;
+		}
 
-        // Check if GTM ID is given
-        if (!$this->params->get('pwtgtm_id'))
-        {
-            return;
-        }
+		// Check if GTM ID is given
+		if (!$this->params->get('pwtgtm_id')) {
+			return;
+		}
 
-        $analyticsId = $this->params->get('pwtgtm_id');
+		$analyticsId = $this->params->get('pwtgtm_id');
 
-        // Google Tag Manager - party loaded in head
-        $headScript = "
+		// Google Tag Manager - party loaded in head
+		$headScript = "
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer'," . $analyticsId . ");</script>
-<!-- End Google Tag Manager --> 
+})(window,document,'script','dataLayer','" . $analyticsId . "');</script>
+<!-- End Google Tag Manager -->
           ";
 
-        // Google Tag Manager - partly loaded directly after body
-        $bodyScript = "<!-- Google Tag Manager (noscript) -->
+		// Google Tag Manager - partly loaded directly after body
+		$bodyScript = "<!-- Google Tag Manager (noscript) -->
 <noscript><iframe src=\"https://www.googletagmanager.com/ns.html?id=" . $analyticsId . "\"
 height=\"0\" width=\"0\" style=\"display:none;visibility:hidden\"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 ";
 
-        $buffer = $this->app->getBody();
-        $buffer = str_replace("</head>", $headScript . "</head>", $buffer);
-        $buffer = preg_replace("/<body(\s[^>]*)?>/i", "<body\\1>\n" . $bodyScript, $buffer);
-        $this->app->setBody($buffer);
+		$buffer = $this->app->getBody();
+		$buffer = str_replace("</head>", $headScript . "</head>", $buffer);
+		$buffer = preg_replace("/<body(\s[^>]*)?>/i", "<body\\1>\n" . $bodyScript, $buffer);
+		$this->app->setBody($buffer);
 
-        return;
+		return;
 
-    }
+	}
 }
