@@ -10,55 +10,79 @@
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Plugin\CMSPlugin;
+
 /**
- * PWT GTM Plugin
+ * System plugin to add Google Tag Manager script to head and beginning of body
  *
- * @since   3.0
+ * @since   4.0.0
  */
-class PlgSystemPwtgtm extends JPlugin
+class PlgSystemPwtgtm extends CMSPlugin
 {
 	/**
-	 * Application object.
+	 * @var    \Joomla\CMS\Application\CMSApplication
 	 *
-	 * @var    JApplicationCms
-	 * @since  3.0
+	 * @since  4.0.0
 	 */
 	protected $app;
 
 	/**
-	 * @var    string  base update url, to decide whether to process the event or not
+	 * Get the GTM Id
+	 * @return mixed|stdClass
 	 *
-	 * @since  1.0.0
+	 * @since 4.0.0
 	 */
-	private $baseUrl = 'https://extensions.perfectwebteam.com/pwt-gtm';
-
-	/**
-	 * @var    string  Extension title, to retrieve its params
-	 *
-	 * @since  1.0.0
-	 */
-	private $extensionTitle = 'PWT GTM';
-
-	/**
-	 * Constructor
-	 *
-	 * @param   object  $subject  The object to observe
-	 * @param   array   $config   An optional associative array of configuration settings.
-	 *                            Recognized key values include 'name', 'group', 'params', 'language'
-	 *                            (this list is not meant to be comprehensive).
-	 *
-	 * @since   1.0
-	 */
-	public function __construct(&$subject, array $config = array())
+	public function getGTMId()
 	{
-		parent::__construct($subject, $config);
+		return $this->params->get('pwtgtm_id', false);
 	}
 
 	/**
-	 * onAfterRender trigger
+	 * Add GTM script to head
 	 *
 	 * @return  void
-	 * @since   3.0
+	 *
+	 * @since   4.0.0
+	 */
+	public function onBeforeCompileHead()
+	{
+		// Only for frontend
+		if (!$this->app->isClient('site'))
+		{
+			return;
+		}
+
+		// Get the document object.
+		$document = $this->app->getDocument();
+
+		if ($document->getType() !== 'html')
+		{
+			return;
+		}
+
+		$gtmId = $this->getGTMId();
+
+		if (!$gtmId)
+		{
+			return;
+		}
+
+		// Google Tag Manager - party loaded in head
+		$headScript = "
+		<!-- Google Tag Manager -->
+			(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','" . $gtmId . "');
+		<!-- End Google Tag Manager -->
+	";
+		$document->getWebAssetManager()
+			->addInlineScript($headScript);
+	}
+
+	/**
+	 * Add GTM noscript directly after start body
+	 *
+	 * @return  void
+	 *
+	 * @since   4.0.0
 	 */
 	public function onAfterRender()
 	{
@@ -68,36 +92,31 @@ class PlgSystemPwtgtm extends JPlugin
 			return;
 		}
 
-		// Check if GTM ID is given
-		if (!$this->params->get('pwtgtm_id'))
+		// Get the document object.
+		$document = $this->app->getDocument();
+
+		if ($document->getType() !== 'html')
 		{
 			return;
 		}
 
-		$analyticsId = $this->params->get('pwtgtm_id');
+		$gtmId = $this->getGTMId();
 
-		// Google Tag Manager - party loaded in head
-		$headScript = "
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','" . $analyticsId . "');</script>
-<!-- End Google Tag Manager -->
-          ";
+		if (!$gtmId)
+		{
+			return;
+		}
 
 		// Google Tag Manager - partly loaded directly after body
-		$bodyScript = "<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src=\"https://www.googletagmanager.com/ns.html?id=" . $analyticsId . "\"
-height=\"0\" width=\"0\" style=\"display:none;visibility:hidden\"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
+		$bodyScript = "<!-- Google Tag Manager -->
+<noscript><iframe src=\"//www.googletagmanager.com/ns.html?id=" . $gtmId . "\" height=\"0\" width=\"0\" style=\"display:none;visibility:hidden\"></iframe></noscript>
+<!-- End Google Tag Manager -->
 ";
-		$buffer     = $this->app->getBody();
-		$buffer     = str_replace("</head>", $headScript . "</head>", $buffer);
-		$buffer     = preg_replace("/<body(\s[^>]*)?>/i", "<body\\1>\n" . $bodyScript, $buffer);
-		$this->app->setBody($buffer);
 
-		return;
+		$buffer = $this->app->getBody();
+
+		$buffer = preg_replace("/<body(\s[^>]*)?>/i", "<body\\1>\n" . $bodyScript, $buffer);
+
+		$this->app->setBody($buffer);
 	}
 }
