@@ -1,5 +1,5 @@
 # PWT Google Tag Manager
-Joomla System Plugin to load Google Tag Manager
+Joomla! 4 System Plugin to load Google Tag Manager
 
 ## Configuration
 
