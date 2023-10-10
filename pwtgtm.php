@@ -3,7 +3,7 @@
  * @package    PwtGtm
  *
  * @author     Hans Kuijpers - Perfect Web Team <extensions@perfectwebteam.com>
- * @copyright  Copyright (C) 2011 - 2019 Perfect Web Team. All rights reserved.
+ * @copyright  Copyright (C) 2011 Perfect Web Team. All rights reserved.
  * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link       https://extensions.perfectwebteam.com/pwt-gtm
  */
@@ -66,26 +66,6 @@ class PlgSystemPwtgtm extends CMSPlugin
 		{
 			return;
 		}
-
-		$consentScript = "
-		window.dataLayer = window.dataLayer || [];
-		function gtag(){dataLayer.push(arguments);}
-		
-		if(localStorage.getItem('consentMode') === null){
-			gtag('consent', 'default', {
-				'ad_storage': 'denied',
-				'analytics_storage': 'denied',
-				'personalization_storage': 'denied',
-				'functionality_storage': 'denied',
-				'security_storage': 'denied',
-			});
-		} else {
-			gtag('consent', 'default', JSON.parse(localStorage.getItem('consentMode')));
-		}
-		";
-
-		$document->getWebAssetManager()
-			->addInlineScript($consentScript);
 
 		// Google Tag Manager - party loaded in head
 		$headScript = "
