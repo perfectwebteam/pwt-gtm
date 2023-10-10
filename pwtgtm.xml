@@ -3,11 +3,11 @@
     <name>System - PWT GTM</name>
     <author>Perfect Web Team</author>
     <creationDate>2019-06</creationDate>
-    <copyright>Copyright (C) 2011 Perfect Web Team</copyright>
+    <copyright>Copyright (C) 2019 Perfect Web Team</copyright>
     <license>GPLv3 http://www.gnu.org/licenses/gpl.html</license>
     <authorEmail>extensions@perfectwebteam.com</authorEmail>
     <authorUrl>https://github.com/perfectwebteam/pwt-gtm</authorUrl>
-    <version>4.2.0</version>
+    <version>4.2.1</version>
     <description>PWT GTM - System plugin</description>
     <files>
         <filename plugin="pwtgtm">pwtgtm.php</filename>
