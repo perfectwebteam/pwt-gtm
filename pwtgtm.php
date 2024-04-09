@@ -67,6 +67,32 @@ class PlgSystemPwtgtm extends CMSPlugin
 			return;
 		}
 
+		// Load init state as early as possible
+		$consentScript = "
+window.dataLayer = window.dataLayer || [];
+
+function gtag() {
+    dataLayer.push(arguments);
+}
+
+if (localStorage.getItem('consentMode') === null) {
+    gtag('consent', 'default', {
+        'ad_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'analytics_storage': 'granted',
+        'personalization_storage': 'granted',
+        'functionality_storage': 'granted',
+        'security_storage': 'granted',
+    });
+} else {
+    gtag('consent', 'default', JSON.parse(localStorage.getItem('consentMode')));
+}
+		";
+
+		$document->getWebAssetManager()
+			->addInlineScript($consentScript);
+
 		// Google Tag Manager - party loaded in head
 		$headScript = "
 		<!-- Google Tag Manager -->
