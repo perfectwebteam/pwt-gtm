@@ -88,6 +88,8 @@ if (localStorage.getItem('consentMode') === null) {
 } else {
     gtag('consent', 'default', JSON.parse(localStorage.getItem('consentMode')));
 }
+
+dataLayer.push({'event': 'gtm_consent_update'});
 		";
 
 		$document->getWebAssetManager()
