@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * @package    PwtGtm
  *
@@ -8,62 +11,78 @@
  * @link       https://extensions.perfectwebteam.com/pwt-gtm
  */
 
+namespace PWT\Plugin\System\Pwtgtm\Extension;
+
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\Event\SubscriberInterface;
 
 /**
  * System plugin to add Google Tag Manager script to head and beginning of body
  *
- * @since   4.0.0
+ * Implements consent mode support for GDPR compliance and adds GTM tracking code
+ * to both the HTML head and body sections.
+ *
+ * @since   6.0.0
  */
-class PlgSystemPwtgtm extends CMSPlugin
+final class Pwtgtm extends CMSPlugin implements SubscriberInterface
 {
 	/**
-	 * @var    \Joomla\CMS\Application\CMSApplication
+	 * Returns an array of events this subscriber will listen to.
 	 *
-	 * @since  4.0.0
+	 * @return  array
+	 *
+	 * @since   6.0.0
 	 */
-	protected $app;
+	public static function getSubscribedEvents(): array
+	{
+		return [
+			'onBeforeCompileHead' => 'onBeforeCompileHead',
+			'onAfterRender'       => 'onAfterRender',
+		];
+	}
 
 	/**
-	 * Get the GTM Id
-	 * @return mixed|stdClass
+	 * Get the GTM Container ID
 	 *
-	 * @since 4.0.0
+	 * @return  string|null
+	 *
+	 * @since   6.0.0
 	 */
-	public function getGTMId()
+	private function getGTMId(): ?string
 	{
-		return $this->params->get('pwtgtm_id', false);
+		$id = $this->params->get('pwtgtm_id', '');
+
+		return $id !== '' ? $id : null;
 	}
 
 	/**
 	 * Add GTM script to head
 	 *
+	 * Adds consent mode initialization and GTM tracking script to the document head.
+	 *
 	 * @return  void
 	 *
-	 * @since   4.0.0
+	 * @since   6.0.0
 	 */
-	public function onBeforeCompileHead()
+	public function onBeforeCompileHead(): void
 	{
 		// Only for frontend
-		if (!$this->app->isClient('site'))
-		{
+		if (!$this->getApplication()->isClient('site')) {
 			return;
 		}
 
 		// Get the document object.
-		$document = $this->app->getDocument();
+		$document = $this->getApplication()->getDocument();
 
-		if ($document->getType() !== 'html')
-		{
+		if ($document->getType() !== 'html') {
 			return;
 		}
 
 		$gtmId = $this->getGTMId();
 
-		if (!$gtmId)
-		{
+		if ($gtmId === null) {
 			return;
 		}
 
@@ -95,7 +114,7 @@ dataLayer.push({'event': 'gtm_consent_update'});
 		$document->getWebAssetManager()
 			->addInlineScript($consentScript);
 
-		// Google Tag Manager - party loaded in head
+		// Google Tag Manager - partly loaded in head
 		$headScript = "
 		<!-- Google Tag Manager -->
 			(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','" . $gtmId . "');
@@ -108,43 +127,43 @@ dataLayer.push({'event': 'gtm_consent_update'});
 	/**
 	 * Add GTM noscript directly after start body
 	 *
+	 * Injects GTM noscript fallback iframe immediately after the opening body tag.
+	 *
 	 * @return  void
 	 *
-	 * @since   4.0.0
+	 * @since   6.0.0
 	 */
-	public function onAfterRender()
+	public function onAfterRender(): void
 	{
 		// Only for frontend
-		if (!$this->app->isClient('site'))
-		{
+		if (!$this->getApplication()->isClient('site')) {
 			return;
 		}
 
 		// Get the document object.
-		$document = $this->app->getDocument();
+		$document = $this->getApplication()->getDocument();
 
-		if ($document->getType() !== 'html')
-		{
+		if ($document->getType() !== 'html') {
 			return;
 		}
 
 		$gtmId = $this->getGTMId();
 
-		if (!$gtmId)
-		{
+		if ($gtmId === null) {
 			return;
 		}
 
-		// Google Tag Manager - partly loaded directly after body
-		$bodyScript = "<!-- Google Tag Manager -->
-<noscript><iframe src=\"//www.googletagmanager.com/ns.html?id=" . $gtmId . "\" height=\"0\" width=\"0\" style=\"display:none;visibility:hidden\"></iframe></noscript>
+		// Google Tag Manager - noscript fallback directly after body
+		$bodyScript = <<<HTML
+<!-- Google Tag Manager -->
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id={$gtmId}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager -->
-";
 
-		$buffer = $this->app->getBody();
+HTML;
 
-		$buffer = preg_replace("/<body(\s[^>]*)?>/i", "<body\\1>\n" . $bodyScript, $buffer);
+		$buffer = $this->getApplication()->getBody();
+		$buffer = preg_replace('/<body(\s[^>]*)?>/i', "<body\\1>\n{$bodyScript}", $buffer);
 
-		$this->app->setBody($buffer);
+		$this->getApplication()->setBody($buffer);
 	}
 }

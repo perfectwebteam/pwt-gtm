@@ -2,16 +2,21 @@
 <extension type="plugin" group="system" method="upgrade">
     <name>System - PWT GTM</name>
     <author>Perfect Web Team</author>
-    <creationDate>2019-06</creationDate>
+    <creationDate>2025-10</creationDate>
     <copyright>Copyright (C) 2019 Perfect Web Team</copyright>
     <license>GPLv3 http://www.gnu.org/licenses/gpl.html</license>
     <authorEmail>extensions@perfectwebteam.com</authorEmail>
     <authorUrl>https://github.com/perfectwebteam/pwt-gtm</authorUrl>
-    <version>4.4.0</version>
-    <description>PWT GTM - System plugin</description>
+    <version>6.0.0</version>
+    <description>PWT GTM - System plugin for Google Tag Manager integration with consent mode support</description>
+
+    <namespace path="src">PWT\Plugin\System\Pwtgtm</namespace>
+
     <files>
-        <filename plugin="pwtgtm">pwtgtm.php</filename>
+        <folder>services</folder>
+        <folder>src</folder>
     </files>
+
     <config>
         <fields name="params">
             <fieldset name="basic">
@@ -20,7 +25,7 @@
                     type="text"
                     label="Container ID"
                     default=""
-                    description="Enter your GTM Container Public ID(GTM-XXXX)"
+                    description="Enter your GTM Container Public ID (GTM-XXXX)"
                 />
             </fieldset>
         </fields>
