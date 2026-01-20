@@ -7,13 +7,13 @@
     <license>GPLv3 http://www.gnu.org/licenses/gpl.html</license>
     <authorEmail>extensions@perfectwebteam.com</authorEmail>
     <authorUrl>https://github.com/perfectwebteam/pwt-gtm</authorUrl>
-    <version>6.0.0</version>
+    <version>6.0.1</version>
     <description>PWT GTM - System plugin for Google Tag Manager integration with consent mode support</description>
 
     <namespace path="src">PWT\Plugin\System\Pwtgtm</namespace>
 
     <files>
-        <folder>services</folder>
+        <folder plugin="pwtgtm">services</folder>
         <folder>src</folder>
     </files>
 
